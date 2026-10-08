@@ -3,6 +3,8 @@ name: CI
 on:
   push:
   pull_request:
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -15,8 +17,8 @@ jobs:
       matrix:
         node: [22, 24]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -25,3 +27,38 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm pack --dry-run
+
+  publish:
+    name: Publish to GitHub Packages
+    if: github.event_name == 'release' && github.event.release.prerelease == false
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://npm.pkg.github.com
+          scope: '@caslanqa'
+      - run: npm ci --ignore-scripts
+      - name: Check release tag matches package version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+
+          const version = JSON.parse(readFileSync('package.json', 'utf8')).version;
+          const tagVersion = (process.env.RELEASE_TAG ?? '').replace(/^v/, '');
+          if (tagVersion !== version) {
+            console.error(`Release tag ${process.env.RELEASE_TAG} does not match package version ${version}`);
+            process.exit(1);
+          }
+          NODE
+      - run: npm run build
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

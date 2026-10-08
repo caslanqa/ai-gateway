@@ -2,6 +2,10 @@
   "name": "@caslanqa/ai-gateway",
   "version": "0.1.0",
   "description": "A local OpenAI-compatible gateway with configurable model routing and an admin UI.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caslanqa/ai-gateway.git"
+  },
   "license": "UNLICENSED",
   "type": "module",
   "publishConfig": {
