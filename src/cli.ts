@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 import { access } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { Command } from "commander";
 import { createGatewayApp } from "./app.js";
 import { ConfigStore, defaultConfigPath } from "./config.js";
 import { budgetWindowStart, UsageStore, usageDatabasePath } from "./usage.js";
 
 const program = new Command();
-program.name("ai-gateway").description("Local OpenAI-compatible AI gateway").version("0.1.0");
+const packageMetadata = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as { version: string };
+program.name("ai-gateway").description("Local OpenAI-compatible AI gateway").version(packageMetadata.version);
 
 function useConfig(path?: string): void {
   if (path) process.env.AI_GATEWAY_CONFIG = path;

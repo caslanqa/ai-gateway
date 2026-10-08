@@ -20,7 +20,7 @@ A local, provider-agnostic AI gateway with an OpenAI-compatible API and a web UI
 
 ## Install from GitHub Packages
 
-These steps work after a GitHub Release has published the package. GitHub Packages requires authentication for npm packages, including public ones. Create a **personal access token (classic)** with `read:packages` and make sure your GitHub account has access to the package. GitHub’s [npm registry guide](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry) has details.
+These steps work after the first successful push to `main` publishes the package. GitHub Packages requires authentication for npm packages, including public ones. Create a **personal access token (classic)** with `read:packages` and make sure your GitHub account has access to the package. GitHub’s [npm registry guide](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry) has details.
 
 Log in once. Use your GitHub username and enter the token as the password when prompted:
 
@@ -100,16 +100,11 @@ curl http://127.0.0.1:4000/v1/chat/completions \
   -d '{"model":"coding","messages":[{"role":"user","content":"Explain this function."}]}'
 ```
 
-## Publish a release
+## Automatic GitHub Packages publishing
 
-The [GitHub Actions workflow](.github/workflows/ci.yml) checks pushes and pull requests. To publish a stable package version, update the version, push its tag, and publish a GitHub Release for that tag:
+Every push to `main` runs lint, type checks, and tests on Node.js 22 and 24. If all checks pass, GitHub Actions automatically builds and publishes the package; no tag or GitHub Release is needed. Pull requests and pushes to other branches run checks but do not publish.
 
-```bash
-npm version patch
-git push --follow-tags
-```
-
-The release tag must match the package version, for example `v0.1.1` for version `0.1.1`. The workflow runs lint, type checks, and tests on Node.js 22 and 24, then publishes stable releases to GitHub Packages with `GITHUB_TOKEN`. Pre-releases are not published by this workflow. A package is private by default on first publication; change its GitHub package visibility if it should be public.
+Registry versions cannot be reused, so each published build gets a unique version based on the `package.json` version and GitHub Actions run number, such as `0.1.0-ci.123.1`. The `latest` tag moves to the newest passing build, so the install and update commands above get the current package. The version shown by `ai-gateway version` matches the published package. The package is private by default on first publication; change its GitHub package visibility if it should be public.
 
 ## Develop from source
 
