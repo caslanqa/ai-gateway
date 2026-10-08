@@ -1,0 +1,70 @@
+version: 1
+
+server:
+  host: 127.0.0.1
+  port: 4000
+
+auth:
+  enabled: true
+  apiKeyEnv: AI_GATEWAY_API_KEY
+  adminEnabled: true
+  adminKeyEnv: AI_GATEWAY_ADMIN_KEY
+  adminAllowRemote: false
+
+providers:
+  openai:
+    enabled: true
+    apiKeyEnv: OPENAI_API_KEY
+  anthropic:
+    enabled: true
+    apiKeyEnv: ANTHROPIC_API_KEY
+  openrouter:
+    enabled: false
+    apiKeyEnv: OPENROUTER_API_KEY
+
+models:
+  architect:
+    provider: openai
+    model: gpt-6-sol
+    enabled: true
+    capabilities: [architecture, reasoning]
+    fallbacks: [coding]
+  coding:
+    provider: openai
+    model: gpt-6.1-sol
+    enabled: true
+    capabilities: [coding, reasoning]
+  reviewer:
+    provider: anthropic
+    model: claude-opus-5-5
+    enabled: true
+    capabilities: [review, reasoning]
+    fallbacks: [coding]
+
+routing:
+  default: coding
+  rules:
+    - name: architecture
+      task: architecture
+      model: architect
+    - name: review
+      task: review
+      model: reviewer
+
+rateLimit:
+  enabled: true
+  windowMs: 60000
+  maxRequests: 120
+
+# Optional USD guardrails. New requests are rejected after recorded spend reaches a limit.
+# Budgets only apply when model pricing is configured below or through the Admin UI.
+# budgets:
+#   dailyUsd: 15
+#   monthlyUsd: 250
+
+timeouts:
+  requestMs: 180000
+
+observability:
+  logging: true
+  metrics: true
