@@ -102,9 +102,9 @@ curl http://127.0.0.1:4000/v1/chat/completions \
 
 ## Automatic GitHub Packages publishing
 
-Every push to `main` runs lint, type checks, and tests on Node.js 22 and 24. If all checks pass, GitHub Actions automatically builds and publishes the package; no tag or GitHub Release is needed. Pull requests and pushes to other branches run checks but do not publish.
+Every push to `main` runs lint, type checks, and tests on Node.js 22 and 24. If all checks pass, GitHub Actions automatically builds and publishes the package, then creates its Git tag and GitHub Release notes; you do not need to create these manually. Pull requests and pushes to other branches run checks but do not publish.
 
-Registry versions cannot be reused, so each published build gets a unique version based on the `package.json` version and GitHub Actions run number, such as `0.1.0-ci.123.1`. The `latest` tag moves to the newest passing build, so the install and update commands above get the current package. The version shown by `ai-gateway version` matches the published package. The package is private by default on first publication; change its GitHub package visibility if it should be public.
+Registry versions cannot be reused, so each published build gets a unique version based on the `package.json` version and GitHub Actions run number, such as `0.1.0-ci.123.1`. The workflow uses this as an automatically increasing package version and Git tag (`v0.1.0-ci.123.1`). After publishing, it creates a matching GitHub pre-release with generated notes for the changes and an install/update command. The `latest` package tag moves to the newest passing build, so the install and update commands above get the current package. The version shown by `ai-gateway version` matches the published package. The package is private by default on first publication; change its GitHub package visibility if it should be public.
 
 ## Develop from source
 

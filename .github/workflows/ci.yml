@@ -35,7 +35,7 @@ jobs:
       group: publish-ai-gateway-main
       cancel-in-progress: false
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       - uses: actions/checkout@v7
@@ -68,3 +68,17 @@ jobs:
         run: npm publish --tag=latest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create tagged GitHub release with notes
+        if: steps.current.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          tag="v${version}"
+          gh release create "$tag" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "AI Gateway ${version}" \
+            --prerelease \
+            --generate-notes \
+            --notes "Published @caslanqa/ai-gateway@${version} to GitHub Packages. Install or update with: npm install --global @caslanqa/ai-gateway@latest."
